@@ -44,7 +44,7 @@ cd secure-vps-cloudflared
 
 ## ⚙️ Option 1 — Manual Mode
 
-**Script:** `setup_cloudflared_vps.sh`
+**Script:** `setup_cloudflared_vps_auto.sh`
 This mode sets up the tunnel and firewall, but you will create the Cloudflare Access SSH OTP policy manually.
 
 ### Steps:
@@ -52,7 +52,7 @@ This mode sets up the tunnel and firewall, but you will create the Cloudflare Ac
 1. Edit the script:
 
    ```bash
-   nano setup_cloudflared_vps.sh
+   nano setup_cloudflared_vps_auto.sh
    ```
 
    Set:
@@ -65,8 +65,8 @@ This mode sets up the tunnel and firewall, but you will create the Cloudflare Ac
 2. Run:
 
    ```bash
-   chmod +x setup_cloudflared_vps.sh
-   ./setup_cloudflared_vps.sh
+   chmod +x setup_cloudflared_vps_auto.sh
+   ./setup_cloudflared_vps_auto.sh
    ```
 
 3. Follow the **"Manual Cloudflare Access Setup"** section below.
