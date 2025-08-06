@@ -6,27 +6,29 @@
 
 ## 📌 Overview
 
-This project provides **two modes** to secure your VPS using a **Cloudflare Tunnel** and **One-Time PIN (OTP)** authentication via Cloudflare Access.
+This project secures your VPS by hiding it behind a **Cloudflare Tunnel** and enforcing **One-Time PIN (OTP)** authentication via Cloudflare Access.
 
-1. **Manual Mode** — Creates tunnel + firewall lockdown, then you configure Cloudflare Access SSH OTP in the dashboard manually.
-2. **Automated Mode** — Creates tunnel + firewall lockdown + automatically sets up Cloudflare Access SSH OTP via the Cloudflare API.
+You can run the script in:
+
+1. **Manual Mode** — Tunnel + firewall lockdown, you configure Cloudflare Access manually.
+2. **Automated Mode** — Tunnel + firewall lockdown + automatic Cloudflare Access SSH OTP setup via the Cloudflare API.
 
 In both modes:
 
 * All inbound ports are closed (including SSH).
-* Services are accessible only through the Cloudflare Tunnel.
-* SSH access is restricted to approved users via OTP.
+* Services are only accessible through the Cloudflare Tunnel.
+* SSH access is limited to approved users via OTP.
 * VPS IP is hidden from the public internet.
 
 ---
 
 ## 🔒 Security Benefits
 
-* **Zero Attack Surface** — No exposed IP or open ports.
-* **DDoS Protection** — All traffic flows through Cloudflare.
-* **Access Control** — Only approved users can connect to SSH.
-* **OTP Verification** — Login requires a one-time code sent via email.
-* **Easy Revocation** — Remove an email in Cloudflare Access to instantly block that user.
+* **Zero Attack Surface** — No open ports.
+* **DDoS Protection** — All traffic via Cloudflare.
+* **Access Control** — Approved users only.
+* **OTP Verification** — Login requires a one-time PIN sent via email.
+* **Easy Revocation** — Remove an email in Cloudflare Access to block instantly.
 
 ---
 
@@ -41,48 +43,41 @@ cd secure-vps-cloudflared
 
 ---
 
-## ⚙️ Manual Mode
+## ⚙️ Running the Script with CLI Arguments (Recommended)
 
-**Script:** `setup_cloudflared_vps_auto.sh`
+You can now provide all required configuration via CLI arguments instead of editing the script manually.
 
-1. Edit the script:
-
-```bash
-nano setup_cloudflared_vps_auto.sh
-```
-
-Set:
+**Syntax:**
 
 ```bash
-APP_HOSTNAME="app.example.com"
-SSH_HOSTNAME="ssh.example.com"
+./setup_cloudflared_vps_auto.sh \
+  --zoneid=YOUR_ZONE_ID \
+  --accountid=YOUR_ACCOUNT_ID \
+  --apitoken=YOUR_API_TOKEN \
+  --apphost=app.example.com \
+  --sshhost=ssh.example.com \
+  --emails=user1@example.com,user2@example.com
 ```
 
-2. Run:
+**Example:**
 
 ```bash
-chmod +x setup_cloudflared_vps_auto.sh
-./setup_cloudflared_vps_auto.sh
+./setup_cloudflared_vps_auto.sh \
+  --zoneid=1234567890abcdef \
+  --accountid=abcdef1234567890 \
+  --apitoken=sk_live_your_token_here \
+  --apphost=app.mydomain.com \
+  --sshhost=ssh.mydomain.com \
+  --emails=me@example.com,friend@example.com
 ```
-
-3. Follow the **Manual Cloudflare Access Setup** section below.
 
 ---
 
-## ⚙️ Automated Mode (Recommended)
+## ⚙️ Manual Mode (Without CLI Arguments)
 
-**Script:** `setup_cloudflared_vps_auto.sh`
+If you prefer manual setup:
 
-Before you start, you’ll need:
-
-* **Cloudflare API Token** with permissions:
-
-  * Zone: Read & Edit
-  * Access: Applications: Edit
-  * Access: Policies: Edit
-* **Zone ID** and **Account ID** from Cloudflare dashboard.
-
-Edit the script:
+1. Edit the script:
 
 ```bash
 nano setup_cloudflared_vps_auto.sh
@@ -99,69 +94,59 @@ API_TOKEN="YOUR_API_TOKEN"
 APPROVED_EMAILS=("you@example.com" "friend@example.com")
 ```
 
-Run:
+2. Run:
 
 ```bash
 chmod +x setup_cloudflared_vps_auto.sh
 ./setup_cloudflared_vps_auto.sh
 ```
 
----
-
-## 🛡 Manual Cloudflare Access Setup
-
-If you used Manual Mode:
-
-1. Log in to Cloudflare Dashboard → **Access → Applications → Add an Application**.
-2. Select **Self-Hosted**.
-3. Application domain: `ssh.example.com`.
-4. Add policy → Allow → Include → Emails: Add approved users.
-5. Enable **One-Time PIN** under Authentication.
+3. Follow **Manual Cloudflare Access Setup** steps if not using API automation.
 
 ---
 
 ## 🖥️ Connecting to SSH
 
-### Install `cloudflared` Locally
+**Install `cloudflared` locally:**
 
-**macOS:**
+* **macOS:**
 
 ```bash
 brew install cloudflared
 ```
 
-**Windows:**
+* **Windows:**
 
 ```powershell
 winget install --id Cloudflare.cloudflared
 ```
 
-**Debian/Ubuntu:**
+* **Debian/Ubuntu:**
 
 ```bash
 curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
 sudo dpkg -i cloudflared.deb
 ```
 
-**Arch Linux:**
+* **Arch Linux:**
 
 ```bash
 sudo pacman -Syu --noconfirm cloudflared
 ```
 
-**Fedora/RHEL/CentOS:**
+* **Fedora/RHEL/CentOS:**
 
 ```bash
 sudo dnf install -y cloudflared
 ```
 
-**openSUSE:**
+* **openSUSE:**
 
 ```bash
 sudo zypper install -y cloudflared
 ```
 
-### Connect via SSH
+**Connect via SSH:**
 
 ```bash
 cloudflared access ssh --hostname ssh.example.com
@@ -177,8 +162,8 @@ cloudflared access ssh --hostname ssh.example.com
 
 The script:
 
-* Denies all **incoming** connections.
-* Allows all **outgoing** connections.
+* Denies all incoming connections.
+* Allows all outgoing connections.
 * Closes port 22 to the public.
 
 ---
@@ -212,10 +197,10 @@ sudo systemctl restart cloudflared
 
 ## 📜 License
 
-MIT License — free to use, modify, share.
+MIT License — free to use, modify, and share.
 
 ---
 
 ## 💡 Contributing
 
-Pull requests welcome.
+Pull requests welcome!
