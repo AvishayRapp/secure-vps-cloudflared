@@ -36,7 +36,7 @@ In both modes:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/secure-vps-cloudflared.git
+git clone https://github.com/AvishayRapp/secure-vps-cloudflared.git
 cd secure-vps-cloudflared
 ````
 
