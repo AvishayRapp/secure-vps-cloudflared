@@ -1,162 +1,128 @@
 # Secure VPS with Cloudflare Tunnel + OTP SSH
 
-> **Note:**  
-> You will also need to **install `cloudflared` on your computer** (the one you will use to connect to SSH) in order to use the secure SSH tunnel created by this setup.  
-> Installation instructions for your local machine are included in the **"Connecting to SSH"** section below.
+> **Note:** You will also need to **install `cloudflared` on your computer** (the one you will use to connect to SSH) in order to use the secure SSH tunnel created by this setup. Installation instructions for your local machine are included in the **"Connecting to SSH"** section below.
 
 ---
 
 ## 📌 Overview
 
-This project provides **two ways** to fully secure a VPS by hiding it behind a **Cloudflare Tunnel**:
+This project provides **two modes** to secure your VPS using a **Cloudflare Tunnel** and **One-Time PIN (OTP)** authentication via Cloudflare Access.
 
-1. **Manual Mode** — Tunnel + firewall lockdown + manual Cloudflare Access setup in the dashboard.
-2. **Automated Mode** — Tunnel + firewall lockdown + automatic creation of the Cloudflare Access SSH OTP policy via the Cloudflare API.
+1. **Manual Mode** — Creates tunnel + firewall lockdown, then you configure Cloudflare Access SSH OTP in the dashboard manually.
+2. **Automated Mode** — Creates tunnel + firewall lockdown + automatically sets up Cloudflare Access SSH OTP via the Cloudflare API.
 
 In both modes:
-- All inbound ports are **closed** (even SSH).
-- Services are **only accessible through Cloudflare Tunnel**.
-- SSH access is **restricted to approved users** via **Cloudflare Access One-Time PIN**.
-- VPS IP is completely **hidden from the public internet**.
+
+* All inbound ports are closed (including SSH).
+* Services are accessible only through the Cloudflare Tunnel.
+* SSH access is restricted to approved users via OTP.
+* VPS IP is hidden from the public internet.
 
 ---
 
 ## 🔒 Security Benefits
 
-- **Zero Attack Surface** — No exposed IP or open ports.
-- **DDoS Protection** — All traffic flows through Cloudflare.
-- **Access Control** — Only approved users can connect to SSH.
-- **OTP Verification** — Each login requires a one-time code sent via email.
-- **App Isolation** — Multiple services can run behind the same secure tunnel.
-- **Easy Revocation** — Remove an email from Cloudflare Access to instantly block that user.
+* **Zero Attack Surface** — No exposed IP or open ports.
+* **DDoS Protection** — All traffic flows through Cloudflare.
+* **Access Control** — Only approved users can connect to SSH.
+* **OTP Verification** — Login requires a one-time code sent via email.
+* **Easy Revocation** — Remove an email in Cloudflare Access to instantly block that user.
 
 ---
 
 ## 📦 Installation
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/AvishayRapp/secure-vps-cloudflared.git
 cd secure-vps-cloudflared
-````
+```
 
 ---
 
-## ⚙️ Option 1 — Manual Mode
+## ⚙️ Manual Mode
 
 **Script:** `setup_cloudflared_vps_auto.sh`
-This mode sets up the tunnel and firewall, but you will create the Cloudflare Access SSH OTP policy manually.
-
-### Steps:
 
 1. Edit the script:
 
-   ```bash
-   nano setup_cloudflared_vps_auto.sh
-   ```
+```bash
+nano setup_cloudflared_vps_auto.sh
+```
 
-   Set:
+Set:
 
-   ```bash
-   APP_HOSTNAME="app.example.com"
-   SSH_HOSTNAME="ssh.example.com"
-   ```
+```bash
+APP_HOSTNAME="app.example.com"
+SSH_HOSTNAME="ssh.example.com"
+```
 
 2. Run:
 
-   ```bash
-   chmod +x setup_cloudflared_vps_auto.sh
-   ./setup_cloudflared_vps_auto.sh
-   ```
+```bash
+chmod +x setup_cloudflared_vps_auto.sh
+./setup_cloudflared_vps_auto.sh
+```
 
-3. Follow the **"Manual Cloudflare Access Setup"** section below.
+3. Follow the **Manual Cloudflare Access Setup** section below.
 
 ---
 
-## ⚙️ Option 2 — Automated Mode (Recommended)
+## ⚙️ Automated Mode (Recommended)
 
 **Script:** `setup_cloudflared_vps_auto.sh`
-This mode sets up **everything**, including the Cloudflare Access SSH OTP policy, via the Cloudflare API.
 
-### Before You Begin:
+Before you start, you’ll need:
 
-You’ll need:
-
-* **Cloudflare API Token** with:
+* **Cloudflare API Token** with permissions:
 
   * Zone: Read & Edit
   * Access: Applications: Edit
   * Access: Policies: Edit
-* **Zone ID** (found in your domain’s Overview page in Cloudflare).
-* **Account ID** (also in Overview page).
+* **Zone ID** and **Account ID** from Cloudflare dashboard.
 
-**Create an API Token:**
+Edit the script:
 
-1. Go to [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens).
-2. Click **Create Token** → Use the **Edit Cloudflare Access** template.
-3. Give it:
+```bash
+nano setup_cloudflared_vps_auto.sh
+```
 
-   * Zone: Read & Edit
-   * Access: Applications: Edit
-   * Access: Policies: Edit
-4. Save the token securely.
+Set:
 
-### Run Automated Setup:
+```bash
+APP_HOSTNAME="app.example.com"
+SSH_HOSTNAME="ssh.example.com"
+ZONE_ID="YOUR_ZONE_ID"
+ACCOUNT_ID="YOUR_ACCOUNT_ID"
+API_TOKEN="YOUR_API_TOKEN"
+APPROVED_EMAILS=("you@example.com" "friend@example.com")
+```
 
-1. Edit the script:
+Run:
 
-   ```bash
-   nano setup_cloudflared_vps_auto.sh
-   ```
-
-   Set:
-
-   ```bash
-   APP_HOSTNAME="app.example.com"
-   SSH_HOSTNAME="ssh.example.com"
-   ZONE_ID="YOUR_ZONE_ID"
-   ACCOUNT_ID="YOUR_ACCOUNT_ID"
-   API_TOKEN="YOUR_API_TOKEN"
-   APPROVED_EMAILS=("you@example.com" "friend@example.com")
-   ```
-
-2. Run:
-
-   ```bash
-   chmod +x setup_cloudflared_vps_auto.sh
-   ./setup_cloudflared_vps_auto.sh
-   ```
-
-3. Done — no manual dashboard setup required.
+```bash
+chmod +x setup_cloudflared_vps_auto.sh
+./setup_cloudflared_vps_auto.sh
+```
 
 ---
 
-## 🛡 Manual Cloudflare Access Setup (Only for Manual Mode)
+## 🛡 Manual Cloudflare Access Setup
 
-If you ran **Manual Mode**, set up SSH OTP in Cloudflare:
+If you used Manual Mode:
 
-1. Log in to **Cloudflare Dashboard**.
-2. Go to **Access → Applications → Add an Application**.
-3. Choose **Self-Hosted**.
-4. **Application name:** `SSH Access`.
-5. **Application domain:** Your SSH hostname (e.g., `ssh.example.com`).
-6. **Session duration:** e.g., `1h` or `24h`.
-7. Click **Next → Add a Policy**:
-
-   * **Policy name:** `Allow Approved SSH Users`.
-   * **Action:** Allow.
-   * **Include → Emails:** Add approved user emails.
-8. Save the policy.
-9. Go to **Access → Authentication**:
-
-   * Enable **One-Time PIN**.
-   * Disable other login methods if you want OTP-only.
+1. Log in to Cloudflare Dashboard → **Access → Applications → Add an Application**.
+2. Select **Self-Hosted**.
+3. Application domain: `ssh.example.com`.
+4. Add policy → Allow → Include → Emails: Add approved users.
+5. Enable **One-Time PIN** under Authentication.
 
 ---
 
 ## 🖥️ Connecting to SSH
 
-### Install `cloudflared` on Your Local Machine
+### Install `cloudflared` Locally
 
 **macOS:**
 
@@ -164,7 +130,7 @@ If you ran **Manual Mode**, set up SSH OTP in Cloudflare:
 brew install cloudflared
 ```
 
-**Windows (PowerShell):**
+**Windows:**
 
 ```powershell
 winget install --id Cloudflare.cloudflared
@@ -177,34 +143,47 @@ curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloud
 sudo dpkg -i cloudflared.deb
 ```
 
----
+**Arch Linux:**
 
-### Connect:
+```bash
+sudo pacman -Syu --noconfirm cloudflared
+```
+
+**Fedora/RHEL/CentOS:**
+
+```bash
+sudo dnf install -y cloudflared
+```
+
+**openSUSE:**
+
+```bash
+sudo zypper install -y cloudflared
+```
+
+### Connect via SSH
 
 ```bash
 cloudflared access ssh --hostname ssh.example.com
 ```
 
 1. Enter your approved email.
-2. Receive a **one-time PIN** in your inbox.
-3. Enter it to authenticate.
-4. Enjoy secure SSH access.
+2. Enter the OTP from your inbox.
+3. You’re in.
 
 ---
 
 ## 📌 Firewall Lockdown
 
-Both scripts automatically:
+The script:
 
-* Deny all **incoming** connections.
-* Allow all **outgoing** connections.
-* Close SSH port 22 to the public.
-
-Your VPS is invisible without the Cloudflare Tunnel.
+* Denies all **incoming** connections.
+* Allows all **outgoing** connections.
+* Closes port 22 to the public.
 
 ---
 
-## 🛠️ Adding More Services
+## 🛠 Adding More Services
 
 Edit:
 
@@ -218,8 +197,6 @@ Example:
 ingress:
   - hostname: app.example.com
     service: http://localhost:8080
-  - hostname: blog.example.com
-    service: http://localhost:2368
   - hostname: ssh.example.com
     service: ssh://localhost:22
   - service: http_status:404
@@ -235,10 +212,10 @@ sudo systemctl restart cloudflared
 
 ## 📜 License
 
-MIT License — feel free to use, modify, and share.
+MIT License — free to use, modify, share.
 
 ---
 
 ## 💡 Contributing
 
-Pull requests are welcome! If you improve this setup or add features, please contribute so others can benefit.
+Pull requests welcome.
