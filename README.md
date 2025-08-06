@@ -1,18 +1,3 @@
-Got it ✅ — I’ll rewrite the **README.md** so it includes:
-
-* A **clear intro** explaining both modes:
-
-  * **Mode 1** → Manual Cloudflare Access setup.
-  * **Mode 2** → Fully automated setup using Cloudflare API token.
-* A **note at the start** telling users they need `cloudflared` locally for SSH.
-* Clear instructions for **getting the Cloudflare API token** for automation.
-* How to run both scripts.
-
-Here’s the new **GitHub‑ready README.md**:
-
----
-
-````markdown
 # Secure VPS with Cloudflare Tunnel + OTP SSH
 
 > **Note:**  
